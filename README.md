@@ -40,7 +40,9 @@ Step 1       Calibrate Accelerometer Offset and Slope
 5. Upload the code to the Arduino board.
 
 ## Usage
-1. Open the folder Arduino_LSM9DS1_BLE_to_LSL_Central_Device on your IDE and run it with:
+1. Turn on your Arduino Board and calibrate the magnetometer by spinning it in all directions, similarly as what you would do to calibrate the compass of your phone, until the LED turns Green. You can recalibrate it by pressing the push button or simply resetting the board.
+
+2. Open the folder Arduino_LSM9DS1_BLE_to_LSL_Central_Device on your IDE and run it with:
 ```bash
 python main.py
 ```
@@ -50,7 +52,7 @@ Once the program has started, refresh if your BLE device does not appear on the 
 
 The whole repository is meant to work with an Arduino Nano 33 BLE (sense) and the LSM9DS1 IMU. The Python program expects to receive through BLE a byte-array containing 10 floats (9-DOF IMU + millis()). If you want to send data in a different format, you will need to modify both the Arduino firmware and the python code.
 
-2. If you want to send data via serial communication from your central device to another software, you can create a virtual serial port. I used [ETERLOGIC VIRTUAL SERIAL PORTS EMULATOR](https://eterlogic.com/Products.VSPE.html). Then you will need to specify the port and baudrate in the GUI of the central device.
+3. If you want to send data via serial communication from your central device to another software, you can create a virtual serial port. I used [ETERLOGIC VIRTUAL SERIAL PORTS EMULATOR](https://eterlogic.com/Products.VSPE.html). Then you will need to specify the port and baudrate in the GUI of the central device.
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first
