@@ -46,6 +46,7 @@ class ConfigProperties():
         self.serial_port = ""   
         self.baudrate = 9600
         self.kalman = True  
+        self.alpha = 0.05
     
 
 class BLEtoLSLStreamer(QRunnable):
@@ -156,6 +157,10 @@ class BLEtoLSLStreamer(QRunnable):
             
     def change_complementary_kalman(self, filter):
         self.config.kalman = filter      
+        
+        
+    def change_alpha(self, alpha):
+        self.imu_processor.alpha = alpha  
     
                 
     # Function to handle data received from Arduino Nano 33 BLE

@@ -3,7 +3,7 @@ from PyQt6.QtCore import (
     QEasingCurve, QPropertyAnimation, QSequentialAnimationGroup,QEvent,
     pyqtSlot, pyqtProperty)
 
-from PyQt6.QtWidgets import QCheckBox
+from PyQt6.QtWidgets import QCheckBox, QLabel, QSlider, QVBoxLayout, QWidget
 from PyQt6.QtGui import QColor, QBrush, QPaintEvent, QPen, QPainter
 
 
@@ -154,3 +154,68 @@ class AnimatedToggle(QCheckBox):
                 self._handle_checked_brush = QBrush(Qt.GlobalColor.gray)
             self.update()
         super().changeEvent(event)
+
+
+
+
+class CustomSlider(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        # Create a layout with margins on the sides
+        self.layout = QVBoxLayout(self)
+        self.layout.setContentsMargins(20, 10, 20, 0)  # Left, Top, Right, Bottom margins
+
+        # Create and style the slider
+        self.slider = QSlider(Qt.Orientation.Horizontal, self)
+        self.slider.setMinimum(0)
+        self.slider.setMaximum(100)
+        self.slider.setTickPosition(QSlider.TickPosition.TicksBelow)
+        self.slider.setTickInterval(5)
+        self.slider.setStyleSheet("""
+            QSlider::groove:horizontal {
+                border: 1px solid #999999;
+                height: 4px;
+                background: #b0c4de;
+                margin: 2px 0;
+                border-radius: 4px;
+            }
+            QSlider::handle:horizontal {
+                background: #FF8C00;
+                border: 1px solid #5c5c5c;
+                width: 18px;
+                height: 18px;
+                margin: -8px 0;
+                border-radius: 9px;
+            }
+            QSlider::handle:horizontal:hover {
+                background: #FF8C00;
+            }
+            QSlider::sub-page:horizontal {
+                background: #FFA500;
+                border: 1px solid #777;
+                height: 10px;
+                border-radius: 4px;
+            }
+            QSlider::add-page:horizontal {
+                background: #e0e0e0;
+                border: 1px solid #777;
+                height: 10px;
+                border-radius: 4px;
+            }
+        """)
+        self.slider.setValue(5)
+        self.layout.addWidget(self.slider)
+
+        # Create a QLabel to display the slider's value
+        self.value_label = QLabel('α = 0.05', self)
+        self.value_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.value_label.setStyleSheet("font-size: 14px; color: #333;")
+        self.layout.addWidget(self.value_label)
+
+        # Connect the slider's valueChanged signal to the update_label function
+        self.slider.valueChanged.connect(self.update_label)
+
+    def update_label(self, value):
+        # Update the label with the value divided by 100 and prefixed with "α = "
+        self.value_label.setText(f"α = {value / 100:.2f}")

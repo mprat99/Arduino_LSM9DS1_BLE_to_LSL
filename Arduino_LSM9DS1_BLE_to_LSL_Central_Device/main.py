@@ -2,14 +2,14 @@ import os
 import sys
 import platform
 
-from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog, QScrollArea, QFrame, QHBoxLayout, QVBoxLayout, QGridLayout, QLayoutItem, QPlainTextEdit, QPushButton, QComboBox, QLineEdit, QWidget, QLabel, QMessageBox, QCheckBox
+from PyQt6.QtWidgets import QApplication, QMainWindow, QGraphicsEffect, QFileDialog, QSlider, QScrollArea, QFrame, QHBoxLayout, QVBoxLayout, QGridLayout, QLayoutItem, QPlainTextEdit, QPushButton, QComboBox, QLineEdit, QWidget, QLabel, QMessageBox, QCheckBox
 from PyQt6.QtCore import QTimer, QThreadPool, QSignalBlocker, Qt
 from PyQt6.QtGui import QIcon, QIntValidator
 from PyQt6.QtGui import QPixmap
 from ble_scanner import BLEScanner
 from ble_to_lsl_streamer import BLEtoLSLStreamer, ConfigProperties, LSLProperties
 from lsl_data_selector import DataSelector
-from animated_toggle import AnimatedToggle
+from custom_widgets import AnimatedToggle, CustomSlider
 import time
 
 class BLEToLSLGUI(QMainWindow):
@@ -28,7 +28,7 @@ class BLEToLSLGUI(QMainWindow):
         
         
         self.setWindowTitle("Arduino LSM9DS1 BLE to LSL")
-        self.setGeometry(100, 30, 450, 795)
+        self.setGeometry(100, 30, 465, 795)
         
         self.central_widget = QWidget()
         
@@ -87,31 +87,45 @@ class BLEToLSLGUI(QMainWindow):
         separator_frame2.setFrameShadow(QFrame.Shadow.Sunken)
         self.layout.addWidget(separator_frame2)
         
+        self.sensor_fusion_label = QLabel("Sensor Fusion")
+        self.layout.addWidget(self.sensor_fusion_label)
+        self.custom_slider = CustomSlider(self)
+        self.layout.addWidget(self.custom_slider)
+        self.custom_slider.slider.valueChanged.connect(self.change_alpha)
+        
+        separator_frame_a = QFrame()
+        separator_frame_a.setFrameShape(QFrame.Shape.HLine)
+        separator_frame_a.setFrameShadow(QFrame.Shadow.Sunken)
+        self.layout.addWidget(separator_frame_a)
+        
+        self.lsl_data_layout = QHBoxLayout()
         self.lsl_checkbox = QCheckBox("LSL")
         self.lsl_checkbox.setChecked(True)
         self.lsl_checkbox.clicked.connect(self.enable_lsl)
-        self.layout.addWidget(self.lsl_checkbox)
-        
-        self.lsl_layout = QGridLayout()
-        
+        self.lsl_data_layout.addWidget(self.lsl_checkbox)
         self.data_selector = DataSelector()
         self.lsl_data_button = QPushButton("Select data to stream", self)
         self.lsl_data_button.clicked.connect(self.open_data_selector)
         self.data_selector.signals.change.connect(self.retrieve_lsl_data_to_stream)
-        self.lsl_layout.addWidget(self.lsl_data_button)
+        self.lsl_data_layout.addWidget(self.lsl_data_button)
+        self.lsl_data_layout.addStretch() 
+        self.layout.addLayout(self.lsl_data_layout)
+        
+        self.lsl_layout = QGridLayout()
+        
         self.lsl_name_label = QLabel("Name")
         self.lsl_name = QLineEdit()
         self.lsl_name.setPlaceholderText("Name")
         self.lsl_name.setText("Test")
-        self.lsl_layout.addWidget(self.lsl_name_label,1, 0)
-        self.lsl_layout.addWidget(self.lsl_name, 2, 0)
+        self.lsl_layout.addWidget(self.lsl_name_label,0, 0)
+        self.lsl_layout.addWidget(self.lsl_name, 1, 0)
         
         self.lsl_type_label = QLabel("Type")
         self.lsl_type = QLineEdit()
         self.lsl_type.setPlaceholderText("Type")
         self.lsl_type.setText("IMU")
-        self.lsl_layout.addWidget(self.lsl_type_label,1, 1)
-        self.lsl_layout.addWidget(self.lsl_type, 2, 1)
+        self.lsl_layout.addWidget(self.lsl_type_label,0, 1)
+        self.lsl_layout.addWidget(self.lsl_type, 1, 1)
         
         int_validator = QIntValidator()
         int_validator.setBottom(1)
@@ -120,8 +134,8 @@ class BLEToLSLGUI(QMainWindow):
         self.lsl_srate = QLineEdit()
         self.lsl_srate.setPlaceholderText("Sampling Rate [Hz]")
         self.lsl_srate.setText("90")
-        self.lsl_layout.addWidget(self.lsl_srate_label, 3, 0)
-        self.lsl_layout.addWidget(self.lsl_srate, 4, 0)
+        self.lsl_layout.addWidget(self.lsl_srate_label, 2, 0)
+        self.lsl_layout.addWidget(self.lsl_srate, 3, 0)
         self.lsl_srate.setValidator(int_validator)
         self.lsl_n_channels_label = QLabel("Number of channels")
         self.lsl_n_channels = QLineEdit()
@@ -129,8 +143,8 @@ class BLEToLSLGUI(QMainWindow):
         self.lsl_n_channels.setText(str(sum(1 for _, state in self.lsl_properties.data_to_stream if state)))
         self.lsl_n_channels.setToolTip("Select data to stream to change the number of channels")
         self.lsl_n_channels.setReadOnly(True)
-        self.lsl_layout.addWidget(self.lsl_n_channels_label, 3, 1)
-        self.lsl_layout.addWidget(self.lsl_n_channels, 4, 1)
+        self.lsl_layout.addWidget(self.lsl_n_channels_label, 2, 1)
+        self.lsl_layout.addWidget(self.lsl_n_channels, 3, 1)
         self.lsl_n_channels.setValidator(int_validator)
         self.layout.addLayout(self.lsl_layout)
         
@@ -209,28 +223,28 @@ class BLEToLSLGUI(QMainWindow):
         hbox_layout.addWidget(comp_label)
         hbox_layout.addWidget(self.toogle)
         hbox_layout.addWidget(kalman_label)
-        hbox_layout.addStretch()  # Add a stretch to align combo boxes to the left
+        hbox_layout.addStretch()
 
-        # Add the horizontal layout to the main layout
         self.layout.addLayout(hbox_layout)
         
         separator_frame5 = QFrame()
         separator_frame5.setFrameShape(QFrame.Shape.HLine)
         separator_frame5.setFrameShadow(QFrame.Shadow.Sunken)
         self.layout.addWidget(separator_frame5)
-        
-        # Add the grid layout to the main layout
+       
+        self.start_stop_layout = QHBoxLayout(); 
         self.start_button = QPushButton()
         self.start_button.setText("Start")
         self.start_button.clicked.connect(self.start_BLE)
         self.start_button.setEnabled(False)
-        self.layout.addWidget(self.start_button)
+        self.start_stop_layout.addWidget(self.start_button)
         
         self.stop_button = QPushButton()
         self.stop_button.setText("Stop")
         self.stop_button.setEnabled(False)
         self.stop_button.clicked.connect(self.stop_all)
-        self.layout.addWidget(self.stop_button)
+        self.start_stop_layout.addWidget(self.stop_button)
+        self.layout.addLayout(self.start_stop_layout)
         
         self.clear_terminal_button = QPushButton()
         self.clear_terminal_button.setText("Clear Terminal")
@@ -245,6 +259,11 @@ class BLEToLSLGUI(QMainWindow):
         self.threadpool = QThreadPool()    
     
         self.refresh_devices()
+    
+    def change_alpha(self):
+        self.config.alpha = self.custom_slider.slider.value() / 100
+        if hasattr(self, 'ble_lsl_streamer_task'):
+            self.ble_lsl_streamer_task.change_alpha(self.config.alpha)
     
     def open_data_selector(self):
         if not self.data_selector:
@@ -441,6 +460,7 @@ class BLEToLSLGUI(QMainWindow):
         
     def enable_lsl(self):
         self.lsl_properties.checked = not self.lsl_properties.checked 
+        self.lsl_data_button.setEnabled(not self.lsl_data_button.isEnabled())
         for i in range(self.lsl_layout.count()):
             item = self.lsl_layout.itemAt(i)
             if isinstance(item, QLayoutItem):
