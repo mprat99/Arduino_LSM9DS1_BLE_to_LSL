@@ -63,17 +63,17 @@ async def read_messages(sender, client, data):
                 if command_sent == "A":
                     acc_axis += 1
                     print("Positions measured: " + str(acc_axis) + "    Positions missing: " + str(6-acc_axis))
-                    accelOffset = "IMU.setAccelOffset[0] = " + "{:.6f}".format(sample[0]) + ";   ""IMU.setAccelOffset[1] = " + "{:.6f}".format(sample[1]) + ";   ""IMU.setAccelOffset[2] = " + "{:.6f}".format(sample[2]) + ";   "
-                    accelSlope = "IMU.setAccelSlope[0] = " + "{:.6f}".format(sample[3]) + ";   ""IMU.setAccelSlope[1] = " + "{:.6f}".format(sample[4]) + ";   ""IMU.setAccelSlope[2] = " + "{:.6f}".format(sample[5]) + ";   "
+                    accelOffset = "IMU.accelOffset[0] = " + "{:.6f}".format(sample[0]) + ";   ""IMU.accelOffset[1] = " + "{:.6f}".format(sample[1]) + ";   ""IMU.accelOffset[2] = " + "{:.6f}".format(sample[2]) + ";   "
+                    accelSlope = "IMU.accelSlope[0] = " + "{:.6f}".format(sample[3]) + ";   ""IMU.accelSlope[1] = " + "{:.6f}".format(sample[4]) + ";   ""IMU.accelSlope[2] = " + "{:.6f}".format(sample[5]) + ";   "
                     print(accelOffset)
                     print(accelSlope)
                 elif command_sent == "O":
-                    gyroOffset = "IMU.setGyroOffset[0] = " + "{:.6f}".format(sample[0]) + ";   ""IMU.setGyroOffset[1] = " + "{:.6f}".format(sample[1]) + ";   ""IMU.setGyroOffset[2] = " + "{:.6f}".format(sample[2]) + ";   "
+                    gyroOffset = "IMU.gyroOffset[0] = " + "{:.6f}".format(sample[0]) + ";   ""IMU.gyroOffset[1] = " + "{:.6f}".format(sample[1]) + ";   ""IMU.gyroOffset[2] = " + "{:.6f}".format(sample[2]) + ";   "
                     print(gyroOffset)
                 elif command_sent == "S":
                     gyr_axis += 1
                     print("Rotations measured: " + str(gyr_axis) + "    Rotations missing: " + str(3-gyr_axis))
-                    gyroSlope = "IMU.setGyroSlope[0] = " + "{:.6f}".format(sample[3]) + ";   ""IMU.setGyroSlope[1] = " + "{:.6f}".format(sample[4]) + ";   ""IMU.setGyroSlope[2] = " + "{:.6f}".format(sample[5]) + ";   "
+                    gyroSlope = "IMU.gyroSlope[0] = " + "{:.6f}".format(sample[3]) + ";   ""IMU.gyroSlope[1] = " + "{:.6f}".format(sample[4]) + ";   ""IMU.gyroSlope[2] = " + "{:.6f}".format(sample[5]) + ";   "
                     print(gyroSlope)
                 if command_sent == "T":
                     print(sample)
